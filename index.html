@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador Léxico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #504f4f;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button, input[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover, input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .bottom-section {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .bottom-section table {
+            width: 45%;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analizador Léxico</h1>
+        
+        <!-- Formulario de análisis léxico -->
+        <form id="lexicalForm">
+            <textarea id="inputText" placeholder="Inserta un token aquí"></textarea>
+            <button type="button" onclick="analyzeCode()">Analizar</button>
+            <button type="button" onclick="clearAll()">Borrar</button> <!-- Botón de borrar -->
+        </form>
+
+        <!-- Sección inferior con tablas -->
+        <div class="bottom-section">
+            <!-- Primera tabla: Tokens 'for' encontrados -->
+            <div>
+                <h2>Tokens Encontrados</h2>
+                <table id="forTable">
+                    <tr>
+                        <th>Token</th>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Segunda tabla: Caracteres y Símbolos de 'for' -->
+            <div>
+                <h2>Caracteres y Símbolos</h2>
+                <table id="symbolTable">
+                    <tr>
+                        <th>Caracteres</th>
+                        <th>Símbolos</th>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Nueva tabla: Análisis Sintáctico -->
+            <div>
+                <h2>Análisis Sintáctico</h2>
+                <table id="syntaxTable">
+                    <tr>
+                        <th>Línea</th>
+                        <th>Tipo de Estructura</th>
+                        <th>Estructura Correcta</th>
+                        <th>Estructura Incorrecta</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function analyzeCode() {
+            // Obtener el texto ingresado
+            const inputText = document.getElementById("inputText").value;
+
+            // Separar las palabras del texto
+            const lines = inputText.split(/\n/); // Dividir por líneas
+            const tokens = inputText.split(/\s+/); // Dividir por palabras
+
+            // Limpiar las tablas anteriores
+            document.getElementById("forTable").innerHTML = "<tr><th>Token</th></tr>";
+            document.getElementById("symbolTable").innerHTML = "<tr><th>Caracteres</th><th>Símbolos</th></tr>";
+            document.getElementById("syntaxTable").innerHTML = "<tr><th>Línea</th><th>Tipo de Estructura</th><th>Estructura Correcta</th><th>Estructura Incorrecta</th></tr>";
+
+            // Variables para almacenar las instancias de 'for' y otros tokens
+            const foundTokens = [];
+
+            // Recorrer los tokens y procesar
+            tokens.forEach(function(token, index) {
+                // Añadir cada token a la tabla de tokens
+                const tokenRow = document.createElement("tr");
+                const tokenCell = document.createElement("td");
+                tokenCell.textContent = token;
+                tokenRow.appendChild(tokenCell);
+                document.getElementById("forTable").appendChild(tokenRow);
+
+                // Si el token es "for", agregar a la tabla de símbolos
+                if (token === 'for') {
+                    const row = document.createElement("tr");
+                    const charCell = document.createElement("td");
+                    const symbolCell = document.createElement("td");
+
+                    charCell.textContent = 'Reservada'; // Indicar que es una palabra reservada
+                    symbolCell.textContent = token; // Mostrar el token 'for'
+
+                    row.appendChild(charCell);
+                    row.appendChild(symbolCell);
+                    document.getElementById("symbolTable").appendChild(row);
+
+                    foundTokens.push(token);
+                }
+
+                // Si el token es "hola" o "mundo", agregar como identificador
+                if (token === "hola" || token === "mundo") {
+                    const row = document.createElement("tr");
+                    const charCell = document.createElement("td");
+                    const symbolCell = document.createElement("td");
+
+                    charCell.textContent = 'Identificador'; // Indicar que es un identificador
+                    symbolCell.textContent = token; // Mostrar el token 'hola' o 'mundo'
+
+                    row.appendChild(charCell);
+                    row.appendChild(symbolCell);
+                    document.getElementById("symbolTable").appendChild(row);
+                }
+
+                // Agregar el análisis sintáctico (for correcto, otros incorrectos)
+                const syntaxRow = document.createElement("tr");
+                const lineCell = document.createElement("td");
+                const typeCell = document.createElement("td");
+                const correctCell = document.createElement("td");
+                const incorrectCell = document.createElement("td");
+
+                lineCell.textContent = index + 1;
+                typeCell.textContent = token;
+
+                // Si el token es "hola" o "mundo", marcar como identificador
+                if (token === "hola" || token === "mundo") {
+                    correctCell.textContent = "Identificador";
+                    incorrectCell.textContent = "";
+                } else if (token === "for") {
+                    correctCell.textContent = "X";
+                    incorrectCell.textContent = "";
+                } else {
+                    correctCell.textContent = "";
+                    incorrectCell.textContent = "X";
+                }
+
+                syntaxRow.appendChild(lineCell);
+                syntaxRow.appendChild(typeCell);
+                syntaxRow.appendChild(correctCell);
+                syntaxRow.appendChild(incorrectCell);
+                document.getElementById("syntaxTable").appendChild(syntaxRow);
+            });
+
+            // Si no se encuentran tokens 'for', mostrar mensaje
+            if (foundTokens.length === 0) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 1;
+                cell.textContent = "No se encontraron tokens 'for'.";
+                row.appendChild(cell);
+                document.getElementById("forTable").appendChild(row);
+            }
+
+            // Limpiar el área de texto
+            document.getElementById("inputText").value = '';
+        }
+
+        // Función para borrar todo el contenido y reiniciar las tablas
+        function clearAll() {
+            document.getElementById("inputText").value = ''; // Limpiar el área de texto
+            document.getElementById("forTable").innerHTML = "<tr><th>Token</th></tr>"; // Reiniciar la tabla de tokens
+            document.getElementById("symbolTable").innerHTML = "<tr><th>Caracteres</th><th>Símbolos</th></tr>"; // Reiniciar la tabla de símbolos
+            document.getElementById("syntaxTable").innerHTML = "<tr><th>Línea</th><th>Tipo de Estructura</th><th>Estructura Correcta</th><th>Estructura Incorrecta</th></tr>"; // Reiniciar la tabla de análisis sintáctico
+        }
+    </script>
+</body>
+</html>
